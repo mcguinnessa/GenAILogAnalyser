@@ -249,7 +249,7 @@ if uploaded_file is not None:
    user_query = st.text_input("Enter your question about the log file:")
    if user_query:
       #answer = query_gpt(context, user_query)
-      #answer = query_ge_ws(context, user_query)
-      answer = query_ge_rest(context, user_query)
+      answer = query_ge_ws(context, user_query)
+      #answer = query_ge_rest(context, user_query)
 
       st.write("Response:", answer)
