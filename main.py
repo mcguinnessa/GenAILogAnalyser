@@ -31,19 +31,20 @@ MODEL = "openai.gpt-4o"
 ########################################################################
 def preprocess_log_file(uploaded_file):
     """ Extract and summarize relevant information from the log file for GPT to use as context. """
-    os.write(1,b'preprocess_log_file.\n')
-    #print("preprocess_log_file")
+    #os.write(1,b'preprocess_log_file.\n')
+    print("preprocess_log_file")
     text = uploaded_file.read().decode('utf-8')  # Reading and decoding the log file
-    os.write(1,b'Uploaded.\n')
+    #os.write(1,b'Uploaded.\n')
+    print('Uploaded.')
     lines = text.splitlines()  # Split text into lines for processing
-    os.write(1,b'Lines split.\n')
+    #os.write(1,b'Lines split.\n')
     # Summarization strategy: Extract only error messages and warnings
     summarized_text = []
     for line in lines:
         if "error" in line.lower() or "warning" in line.lower():
             summarized_text.append(line)
 
-    os.write(1,b'Sumarized.\n')
+    #os.write(1,b'Sumarized.\n')
 
     # Joining selected lines back into a single string
     result = "\n".join(summarized_text)
@@ -55,7 +56,8 @@ def preprocess_log_file(uploaded_file):
 #
 ########################################################################
 def query_gpt(context, question):
-    os.write(1,b'Calling query_gpt.\n')
+    #os.write(1,b'Calling query_gpt.\n')
+    print('Calling query_gpt.')
     """ Use GPT-3.5 Turbo to answer a question based on the log file context. """
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",  # Specifying the chat model
@@ -80,7 +82,7 @@ def query_ge_ws(logextract, user_query):
 
    url = SOCKET_URL
    ws = websocket.create_connection(url, header={"x-api-key": API_TOKEN})
-   os.write(1,b'Socket created.\n')
+   #os.write(1,b'Socket created.\n')
 
 
    context = f"""You are a helpful assistant trained to understand network logs. The following is an extract from a log file. I will refer to it in the next question. Please acknowlege receipt, but do not analyse until I provide a question. 
@@ -130,9 +132,9 @@ def query_ge_rest(logextract, user_query):
 #
 ########################################################################
 def send_query_rest(session_id, headers, prompt):
-   os.write(1,b'\nCalling query_ge with ')
-   os.write(1,prompt.encode('utf-8'))
-   os.write(1,b'\n')
+   #os.write(1,b'\nCalling query_ge with ')
+   #os.write(1,prompt.encode('utf-8'))
+   #os.write(1,b'\n')
    # Session ID
 
    data = {
@@ -161,13 +163,15 @@ def send_query_rest(session_id, headers, prompt):
       response = requests.post(REST_URL, headers=headers, json=data)
 
       if response.status_code == 200:
-         os.write(1,b'REST call successful.\n')
-         os.write(1,str(response.text).encode('utf-8'))
+         #os.write(1,b'REST call successful.\n')
+         #os.write(1,str(response.text).encode('utf-8'))
+         print(response.text)
 
          if response.text.startswith("data:"):
             jobj = json.loads(response.text[6:])
             if "action" in jobj and jobj["action"] == "final_response":
-               os.write(1,str("Action exists and is final_response").encode('utf-8'))
+               #os.write(1,str("Action exists and is final_response").encode('utf-8'))
+               print("Action exists and is final_response")
                if "data" in jobj and "content" in jobj["data"]:
                   rc = jobj["data"]["content"]
 
@@ -175,7 +179,7 @@ def send_query_rest(session_id, headers, prompt):
          rc = "Error Response from Generative Engine:" + str(response.status_code)
 
    except Exception as e:
-      os.write(1,str(e).encode('utf-8'))
+      #os.write(1,str(e).encode('utf-8'))
       rc = "Exception thrown during comms:" + str(e)
 
    return rc
@@ -186,7 +190,7 @@ def send_query_rest(session_id, headers, prompt):
 #
 ########################################################################
 def send_query_ws(ws, session_id, prompt):
-   os.write(1,b'Calling query_ge.\n\n')
+   #os.write(1,b'Calling query_ge.\n\n')
    # Session ID
 
    data = {
@@ -216,7 +220,7 @@ def send_query_ws(ws, session_id, prompt):
       m1 = ws.recv()
       j1 = json.loads(m1)
       a1 = j1.get("action")
-      os.write(1,str(j1).encode('utf-8'))
+      #os.write(1,str(j1).encode('utf-8'))
       #print("A1:" + str(a1))
       if "final_response" == a1:
          r1 = j1.get("data", {}).get("content")
@@ -224,7 +228,7 @@ def send_query_ws(ws, session_id, prompt):
       if "error" == a1:
          print("M1:" + str(m1))
 
-   os.write(1,str(r1).encode('utf-8'))
+   #os.write(1,str(r1).encode('utf-8'))
 
    return r1
 
@@ -233,8 +237,8 @@ def send_query_ws(ws, session_id, prompt):
 # MAIN
 #
 ########################################################################
-os.write(1,b'Started.\n')
-#print('Started')
+#os.write(1,b'Started.\n')
+print('Started')
 st.title('LLM based Network Log Analyzer for VMO2')
 
 uploaded_file = st.file_uploader("Upload your network log file", type=['txt', 'log'])
